@@ -1,0 +1,92 @@
+#include<stdio.h>
+#include<stdbool.h>
+
+struct Process{
+    int id;
+    float at;
+    float bt;
+    float ct;
+    float wt;
+    float tat;
+    bool completion;
+};
+
+int main(){
+
+    int n, completed_process = 0;
+    float current_time = 0;
+    float total_tat = 0, total_wt = 0;
+
+    printf("Enter the number of processes: ");
+    scanf("%d",&n);
+
+    struct Process p_arr[n];
+
+    printf("\nEnter the process details\n");
+
+    for(int i=0;i<n;i++){
+        p_arr[i].id = i+1;
+
+        printf("\nProcess %d\n",i+1);
+
+        printf("Arrival Time: ");
+        scanf("%f",&p_arr[i].at);
+
+        printf("Burst Time: ");
+        scanf("%f",&p_arr[i].bt);
+
+        p_arr[i].completion = false;
+    }
+
+    while(completed_process < n){
+
+        int idx = -1;
+        float min_bt = 9999;
+
+        for(int i=0;i<n;i++){
+
+            if(p_arr[i].at <= current_time && p_arr[i].completion == false){
+
+                if(p_arr[i].bt < min_bt){
+                    min_bt = p_arr[i].bt;
+                    idx = i;
+                }
+            }
+        }
+
+        if(idx != -1){
+
+            current_time += p_arr[idx].bt;
+
+            p_arr[idx].ct = current_time;
+            p_arr[idx].tat = p_arr[idx].ct - p_arr[idx].at;
+            p_arr[idx].wt = p_arr[idx].tat - p_arr[idx].bt;
+
+            total_tat += p_arr[idx].tat;
+            total_wt += p_arr[idx].wt;
+
+            p_arr[idx].completion = true;
+            completed_process++;
+
+        }else{
+            current_time++;
+        }
+    }
+
+    printf("\nProcess\tAT\tBT\tCT\tTAT\tWT\n");
+
+    for(int i=0;i<n;i++){
+        printf("P%d\t%.0f\t%.0f\t%.0f\t%.0f\t%.0f\n",
+        p_arr[i].id,
+        p_arr[i].at,
+        p_arr[i].bt,
+        p_arr[i].ct,
+        p_arr[i].tat,
+        p_arr[i].wt);
+    }
+
+    printf("\nAverage Turnaround Time = %.2f", total_tat/n);
+    printf("\nAverage Waiting Time = %.2f\n", total_wt/n);
+
+    return 0;
+}
