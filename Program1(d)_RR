@@ -1,0 +1,90 @@
+#include <stdio.h>
+
+struct Process {
+    int id;
+    int at;
+    int bt;
+    int rt;
+    int ct;
+    int tat;
+    int wt;
+};
+
+int main() {
+    int n, tq;
+
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    struct Process p[n];
+
+    // Input
+    for (int i = 0; i < n; i++) {
+        p[i].id = i + 1;
+
+        printf("\nProcess %d\n", p[i].id);
+
+        printf("Arrival Time: ");
+        scanf("%d", &p[i].at);
+
+        printf("Burst Time: ");
+        scanf("%d", &p[i].bt);
+
+        p[i].rt = p[i].bt; // initialize remaining time
+    }
+
+    printf("\nEnter Time Quantum: ");
+    scanf("%d", &tq);
+
+    int completed = 0, cur_time = 0;
+
+    // Round Robin Scheduling
+    while (completed < n) {
+        int executed = 0; // to check CPU idle
+
+        for (int i = 0; i < n; i++) {
+            if (p[i].at <= cur_time && p[i].rt > 0) {
+
+                executed = 1;
+
+                if (p[i].rt > tq) {
+                    cur_time += tq;
+                    p[i].rt -= tq;
+                } else {
+                    cur_time += p[i].rt;
+                    p[i].rt = 0;
+
+                    p[i].ct = cur_time;
+                    p[i].tat = p[i].ct - p[i].at;
+                    p[i].wt = p[i].tat - p[i].bt;
+
+                    completed++;
+                }
+            }
+        }
+
+        // If no process executed → CPU idle
+        if (!executed) {
+            cur_time++;
+        }
+    }
+
+    // Output
+    float total_wt = 0, total_tat = 0;
+
+    printf("\nPID\tAT\tBT\tCT\tTAT\tWT\n");
+
+    for (int i = 0; i < n; i++) {
+        total_wt += p[i].wt;
+        total_tat += p[i].tat;
+
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\n",
+               p[i].id, p[i].at, p[i].bt,
+               p[i].ct, p[i].tat, p[i].wt);
+    }
+
+    printf("\nAverage Waiting Time = %.2f", total_wt / n);
+    printf("\nAverage Turnaround Time = %.2f\n", total_tat / n);
+
+    return 0;
+}
