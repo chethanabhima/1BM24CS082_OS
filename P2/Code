@@ -1,0 +1,98 @@
+#include <stdio.h>
+
+struct Process {
+    int pid;
+    int arrival_time;
+    int burst_time;
+    int completion_time;
+    int waiting_time;
+    int turnaround_time;
+};
+
+void fcfs(struct Process p[], int n, int start_time) {
+    int time = start_time;
+
+    for (int i = 0; i < n; i++) {
+        if (time < p[i].arrival_time)
+            time = p[i].arrival_time;
+
+        p[i].completion_time = time + p[i].burst_time;
+        p[i].turnaround_time = p[i].completion_time - p[i].arrival_time;
+        p[i].waiting_time = p[i].turnaround_time - p[i].burst_time;
+
+        time = p[i].completion_time;
+    }
+}
+
+void display(struct Process p[], int n, char queue_name[]) {
+    printf("\n%s Queue:\n", queue_name);
+    printf("PID\tAT\tBT\tCT\tTAT\tWT\n");
+
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t%d\t%d\t%d\t%d\n",
+               p[i].pid,
+               p[i].arrival_time,
+               p[i].burst_time,
+               p[i].completion_time,
+               p[i].turnaround_time,
+               p[i].waiting_time);
+    }
+}
+
+int main() {
+    int n_sys, n_user;
+
+    printf("Enter number of System Processes: ");
+    scanf("%d", &n_sys);
+
+    struct Process sys[n_sys];
+
+    for (int i = 0; i < n_sys; i++) {
+        printf("System Process %d (AT BT): ", i + 1);
+        scanf("%d %d", &sys[i].arrival_time, &sys[i].burst_time);
+        sys[i].pid = i + 1;
+    }
+
+    printf("\nEnter number of User Processes: ");
+    scanf("%d", &n_user);
+
+    struct Process user[n_user];
+
+    for (int i = 0; i < n_user; i++) {
+        printf("User Process %d (AT BT): ", i + 1);
+        scanf("%d %d", &user[i].arrival_time, &user[i].burst_time);
+        user[i].pid = i + 1;
+    }
+
+    struct Process temp;
+    for (int i = 0; i < n_sys - 1; i++) {
+        for (int j = 0; j < n_sys - i - 1; j++) {
+            if (sys[j].arrival_time > sys[j + 1].arrival_time) {
+                temp = sys[j];
+                sys[j] = sys[j + 1];
+                sys[j + 1] = temp;
+            }
+        }
+    }
+
+    for (int i = 0; i < n_user - 1; i++) {
+        for (int j = 0; j < n_user - i - 1; j++) {
+            if (user[j].arrival_time > user[j + 1].arrival_time) {
+                temp = user[j];
+                user[j] = user[j + 1];
+                user[j + 1] = temp;
+            }
+        }
+    }
+
+    fcfs(sys, n_sys, 0);
+
+    int last_time = sys[n_sys - 1].completion_time;
+
+    fcfs(user, n_user, last_time);
+
+    display(sys, n_sys, "System");
+    display(user, n_user, "User");
+
+    return 0;
+}
